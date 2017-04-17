@@ -3,8 +3,7 @@
 
 module Lib where
 
-import Control.Monad
-import Control.Arrow
+import           Control.Arrow
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
@@ -41,11 +40,11 @@ data Stmt
 
 flatten :: Expr -> Expr
 -- base case: do nothing to literals
-flatten (Literal i) = Literal i
+flatten (Literal i)     = Literal i
 
 -- this is the important case: we shed the Paren constructor and just
 -- apply `flatten` to its contents
-flatten (Paren e) = flatten e
+flatten (Paren e)       = flatten e
 
 -- all the other cases preserve their constructors and just apply
 -- the flatten function to their children that are of type `Expr`.
@@ -61,13 +60,13 @@ flatten (Binary l op r) = Binary (flatten l) op (flatten r)
 
 applyExpr :: (Expr -> Expr) -> Expr -> Expr
 -- base case: applyExpr is the identity function on constants
-applyExpr f (Literal i) = Literal i
+applyExpr _ (Literal i)     = Literal i
 
 -- recursive cases: apply f to each subexpression
-applyExpr f (Paren p) = Paren (f p)
-applyExpr f (Index e i) = Index (f e) (f i)
-applyExpr f (Call e args) = Call (f e) (map f args)
-applyExpr f (Unary op arg) = Unary op (f arg)
+applyExpr f (Paren p)       = Paren (f p)
+applyExpr f (Index e i)     = Index (f e) (f i)
+applyExpr f (Call e args)   = Call (f e) (map f args)
+applyExpr f (Unary op arg)  = Unary op (f arg)
 applyExpr f (Binary l op r) = Binary (f l) op (f r)
 
 -- Easier to write and maintain
@@ -75,7 +74,7 @@ applyExpr f (Binary l op r) = Binary (f l) op (f r)
 -- But we havent improved applyExpr
 flatten' :: Expr -> Expr
 flatten' (Paren e) = flatten' e
-flatten' x = applyExpr flatten' x
+flatten' x         = applyExpr flatten' x
 
 -- Parameterized types
 data Expr' a
@@ -108,7 +107,7 @@ topDown f =
 
 flattenTerm :: Term Expr' -> Term Expr'
 flattenTerm (In (Paren' e)) = e  -- remove all Parens
-flattenTerm other = other
+flattenTerm other           = other
 
 mflatten :: Term Expr' -> Term Expr'
 mflatten = bottomUp flattenTerm
